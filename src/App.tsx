@@ -7,14 +7,24 @@ import { WeatherDisplay } from './components/WeatherDisplay';
 import { TempHumidDisplay } from './components/TempHumidDisplay';
 import { GearButton } from './components/GearButton';
 import { SettingsPanel } from './components/SettingsPanel';
+import { LocationPrompt } from './components/LocationPrompt';
 import type { Settings, FontWeight, ColorMode } from './types';
 
 const SETTINGS_KEY = 'clock_settings';
+const LOCATION_KEY = 'clock_location_permission';
 const GEAR_VISIBLE_MS = 3000;
 
 // 1024px = 100vw 基準の変換ヘルパー
 export function vw(px: number): string {
   return `${(px / 1024) * 100}vw`;
+}
+
+type LocationPermission = 'pending' | 'granted' | 'denied';
+
+function loadLocationPermission(): LocationPermission {
+  const v = localStorage.getItem(LOCATION_KEY);
+  if (v === 'granted' || v === 'denied') return v;
+  return 'pending';
 }
 
 function loadSettings(): Settings {
@@ -48,11 +58,22 @@ function toFontWeightNumber(fw: FontWeight): number {
 
 export default function App() {
   const time = useClock();
-  const weather = useWeather();
+  const [locationPerm, setLocationPerm] = useState<LocationPermission>(loadLocationPermission);
+  const weather = useWeather(locationPerm === 'granted');
   const [settings, setSettings] = useState<Settings>(loadSettings);
   const [gearVisible, setGearVisible] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const gearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function handleLocationAllow() {
+    localStorage.setItem(LOCATION_KEY, 'granted');
+    setLocationPerm('granted');
+  }
+
+  function handleLocationDeny() {
+    localStorage.setItem(LOCATION_KEY, 'denied');
+    setLocationPerm('denied');
+  }
 
   const handleScreenTap = useCallback(() => {
     if (panelOpen) return;
@@ -158,6 +179,9 @@ export default function App() {
           onFontWeightChange={handleFontWeightChange}
           onColorModeChange={handleColorModeChange}
         />
+      )}
+      {locationPerm === 'pending' && (
+        <LocationPrompt onAllow={handleLocationAllow} onDeny={handleLocationDeny} />
       )}
     </div>
   );

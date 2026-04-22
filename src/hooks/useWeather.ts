@@ -59,20 +59,25 @@ async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
   return { locationName, weatherText, temperature, humidity, available: true };
 }
 
-export function useWeather(): WeatherData {
+const EMPTY: WeatherData = {
+  locationName: '',
+  weatherText: '',
+  temperature: null,
+  humidity: null,
+  available: false,
+};
+
+export function useWeather(enabled: boolean): WeatherData {
   const cached = loadCache();
-  const [data, setData] = useState<WeatherData>(
-    cached ?? {
-      locationName: '',
-      weatherText: '',
-      temperature: null,
-      humidity: null,
-      available: false,
-    }
-  );
+  const [data, setData] = useState<WeatherData>(cached ?? EMPTY);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
+    if (!enabled) {
+      setData(EMPTY);
+      return;
+    }
+
     let cancelled = false;
 
     function load() {
@@ -91,13 +96,7 @@ export function useWeather(): WeatherData {
         },
         () => {
           if (!cancelled) {
-            setData({
-              locationName: '',
-              weatherText: '',
-              temperature: null,
-              humidity: null,
-              available: false,
-            });
+            setData(EMPTY);
           }
         }
       );
@@ -112,7 +111,7 @@ export function useWeather(): WeatherData {
         clearInterval(timerRef.current);
       }
     };
-  }, []);
+  }, [enabled]);
 
   return data;
 }
