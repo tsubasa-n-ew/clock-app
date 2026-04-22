@@ -41,9 +41,25 @@ function toFontWeightNumber(fw: FontWeight): number {
   }
 }
 
+function useScale() {
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    function update() {
+      const sx = window.innerWidth / 1024;
+      const sy = window.innerHeight / 600;
+      setScale(Math.min(sx, sy, 1));
+    }
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+  return scale;
+}
+
 export default function App() {
   const time = useClock();
   const weather = useWeather();
+  const scale = useScale();
   const [settings, setSettings] = useState<Settings>(loadSettings);
   const [gearVisible, setGearVisible] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -99,6 +115,8 @@ export default function App() {
         cursor: 'default',
         background: isDark ? '#1a1a1a' : 'rgba(255, 255, 255, 0.93)',
         color: isDark ? '#e0e0e0' : '#222',
+        transform: scale < 1 ? `scale(${scale})` : undefined,
+        transformOrigin: 'top left',
       }}
       onClick={handleScreenTap}
     >
