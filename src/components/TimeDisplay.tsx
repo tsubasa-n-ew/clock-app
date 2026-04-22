@@ -1,4 +1,5 @@
 import type { ClockTime } from '../hooks/useClock';
+import { vw } from '../App';
 
 interface Props {
   time: ClockTime;
@@ -12,8 +13,8 @@ function pad(n: number): string {
 export function TimeDisplay({ time, fontWeight = 400 }: Props) {
   const numStyleHM: React.CSSProperties = {
     fontFamily: 'Roboto, sans-serif',
-    fontSize: '204.198px',
-    letterSpacing: '-10.21px',
+    fontSize: vw(204.198),
+    letterSpacing: vw(-10.21),
     lineHeight: 1,
     fontWeight,
     color: 'inherit',
@@ -21,9 +22,9 @@ export function TimeDisplay({ time, fontWeight = 400 }: Props) {
 
   const kanjiStyleHM: React.CSSProperties = {
     fontFamily: 'Noto Sans JP, sans-serif',
-    fontSize: '102.099px',
-    paddingTop: '51.049px',
-    width: '102.099px',
+    fontSize: vw(102.099),
+    paddingTop: vw(51.049),
+    width: vw(102.099),
     lineHeight: 1,
     fontWeight,
     color: 'inherit',
@@ -31,8 +32,8 @@ export function TimeDisplay({ time, fontWeight = 400 }: Props) {
 
   const numStyleSec: React.CSSProperties = {
     fontFamily: 'Roboto, sans-serif',
-    fontSize: '96px',
-    letterSpacing: '-4.8px',
+    fontSize: vw(96),
+    letterSpacing: vw(-4.8),
     lineHeight: 1,
     fontWeight,
     color: 'inherit',
@@ -40,25 +41,25 @@ export function TimeDisplay({ time, fontWeight = 400 }: Props) {
 
   const kanjiStyleSec: React.CSSProperties = {
     fontFamily: 'Noto Sans JP, sans-serif',
-    fontSize: '48px',
-    paddingTop: '24.37px',
-    width: '48.741px',
+    fontSize: vw(48),
+    paddingTop: vw(24.37),
+    width: vw(48.741),
     lineHeight: 1,
     fontWeight,
     color: 'inherit',
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '30px', whiteSpace: 'nowrap' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '19.203px', width: '340px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: vw(30), whiteSpace: 'nowrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: vw(19.203), width: vw(340) }}>
         <span style={numStyleHM}>{pad(time.hours)}</span>
         <span style={kanjiStyleHM}>時</span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '19.203px', width: '340px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: vw(19.203), width: vw(340) }}>
         <span style={numStyleHM}>{pad(time.minutes)}</span>
         <span style={kanjiStyleHM}>分</span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '9.167px', width: '160px', paddingTop: '73.211px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: vw(9.167), width: vw(160), paddingTop: vw(73.211) }}>
         <span style={numStyleSec}>{pad(time.seconds)}</span>
         <span style={kanjiStyleSec}>秒</span>
       </div>

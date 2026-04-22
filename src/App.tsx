@@ -12,6 +12,11 @@ import type { Settings, FontWeight, ColorMode } from './types';
 const SETTINGS_KEY = 'clock_settings';
 const GEAR_VISIBLE_MS = 3000;
 
+// 1024px = 100vw 基準の変換ヘルパー
+export function vw(px: number): string {
+  return `${(px / 1024) * 100}vw`;
+}
+
 function loadSettings(): Settings {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
@@ -41,25 +46,9 @@ function toFontWeightNumber(fw: FontWeight): number {
   }
 }
 
-function useScale() {
-  const [scale, setScale] = useState(1);
-  useEffect(() => {
-    function update() {
-      const sx = window.innerWidth / 1024;
-      const sy = window.innerHeight / 600;
-      setScale(Math.min(sx, sy, 1));
-    }
-    update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
-  }, []);
-  return scale;
-}
-
 export default function App() {
   const time = useClock();
   const weather = useWeather();
-  const scale = useScale();
   const [settings, setSettings] = useState<Settings>(loadSettings);
   const [gearVisible, setGearVisible] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -108,15 +97,13 @@ export default function App() {
     <div
       style={{
         position: 'relative',
-        width: '1024px',
-        height: '600px',
+        width: '100vw',
+        height: `${(600 / 1024) * 100}vw`,
         overflow: 'hidden',
         userSelect: 'none',
         cursor: 'default',
         background: isDark ? '#1a1a1a' : 'rgba(255, 255, 255, 0.93)',
         color: isDark ? '#e0e0e0' : '#222',
-        transform: scale < 1 ? `scale(${scale})` : undefined,
-        transformOrigin: 'top left',
       }}
       onClick={handleScreenTap}
     >
@@ -124,8 +111,8 @@ export default function App() {
         <div
           style={{
             position: 'absolute',
-            right: '72px',
-            top: '75px',
+            right: vw(72),
+            top: vw(75),
             transform: 'translateY(-50%)',
           }}
         >
@@ -135,8 +122,8 @@ export default function App() {
       <div
         style={{
           position: 'absolute',
-          top: '157px',
-          left: 'calc(50% - 9px)',
+          top: vw(157),
+          left: 'calc(50% - 0.879vw)',
           transform: 'translateX(-50%)',
         }}
       >
@@ -152,12 +139,12 @@ export default function App() {
       <div
         style={{
           position: 'absolute',
-          top: '454px',
-          left: 'calc(50% + 2px)',
+          top: vw(454),
+          left: 'calc(50% + 0.195vw)',
           transform: 'translateX(-50%)',
           display: 'flex',
           alignItems: 'center',
-          gap: '130px',
+          gap: vw(130),
           flexWrap: 'nowrap',
         }}
       >

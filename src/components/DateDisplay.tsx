@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { vw } from '../App';
 
 const DAY_OF_WEEK_JA = ['日', '月', '火', '水', '木', '金', '土'];
 
@@ -35,7 +36,7 @@ export function DateDisplay({ fontWeight = 400 }: Props) {
 
   const numberStyle: React.CSSProperties = {
     fontFamily: 'Roboto, sans-serif',
-    fontSize: '48px',
+    fontSize: vw(48),
     lineHeight: 1,
     color: 'inherit',
     fontWeight,
@@ -43,22 +44,22 @@ export function DateDisplay({ fontWeight = 400 }: Props) {
 
   const kanjiStyle: React.CSSProperties = {
     fontFamily: 'Noto Sans JP, sans-serif',
-    fontSize: '24px',
+    fontSize: vw(24),
     lineHeight: 1,
-    paddingTop: '12px',
-    width: '24px',
+    paddingTop: vw(12),
+    width: vw(24),
     color: 'inherit',
   };
 
   const unitStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: vw(8),
   };
 
   const dowKanjiStyle: React.CSSProperties = {
     fontFamily: 'Noto Sans JP, sans-serif',
-    fontSize: '40px',
+    fontSize: vw(40),
     lineHeight: 1,
     fontWeight,
     color: 'inherit',
@@ -66,14 +67,14 @@ export function DateDisplay({ fontWeight = 400 }: Props) {
 
   const dowLabelStyle: React.CSSProperties = {
     fontFamily: 'Noto Sans JP, sans-serif',
-    fontSize: '24px',
+    fontSize: vw(24),
     lineHeight: 1,
-    paddingTop: '12px',
+    paddingTop: vw(12),
     color: 'inherit',
   };
 
   return (
-    <div style={{ display: 'flex', gap: '12px', alignItems: 'baseline', whiteSpace: 'nowrap', flexShrink: 0 }}>
+    <div style={{ display: 'flex', gap: vw(12), alignItems: 'baseline', whiteSpace: 'nowrap', flexShrink: 0 }}>
       <div style={unitStyle}>
         <span style={numberStyle}>{date.year}</span>
         <span style={kanjiStyle}>年</span>
@@ -86,7 +87,7 @@ export function DateDisplay({ fontWeight = 400 }: Props) {
         <span style={numberStyle}>{date.day}</span>
         <span style={kanjiStyle}>日</span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: vw(6) }}>
         <span style={dowKanjiStyle}>{date.dayOfWeek}</span>
         <span style={dowLabelStyle}>曜日</span>
       </div>

@@ -1,3 +1,5 @@
+import { vw } from '../App';
+
 interface Props {
   visible: boolean;
   onClick: () => void;
@@ -8,10 +10,10 @@ export function GearButton({ visible, onClick }: Props) {
     <button
       style={{
         position: 'absolute',
-        left: '67px',
-        top: '56px',
-        width: '38px',
-        height: '38px',
+        left: vw(67),
+        top: vw(56),
+        width: vw(38),
+        height: vw(38),
         border: 'none',
         background: 'transparent',
         cursor: 'pointer',
@@ -32,8 +34,8 @@ export function GearButton({ visible, onClick }: Props) {
       aria-label="設定を開く"
     >
       <svg
-        width="38"
-        height="38"
+        width="100%"
+        height="100%"
         viewBox="0 0 38 38"
         fill="currentColor"
         xmlns="http://www.w3.org/2000/svg"
