@@ -1,4 +1,4 @@
-import { vw } from '../App';
+import { vw, vh } from '../App';
 
 interface Props {
   visible: boolean;
@@ -11,7 +11,7 @@ export function GearButton({ visible, onClick }: Props) {
       style={{
         position: 'absolute',
         left: vw(67),
-        top: vw(56),
+        top: vh(56),
         width: vw(38),
         height: vw(38),
         border: 'none',

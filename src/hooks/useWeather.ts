@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { Geolocation } from '@capacitor/geolocation';
 import type { WeatherData } from '../types';
 
 const WEATHER_REFRESH_MS = 10 * 60 * 1000;
@@ -68,29 +67,33 @@ const EMPTY: WeatherData = {
   available: false,
 };
 
-async function getPosition(): Promise<{ lat: number; lon: number } | null> {
-  try {
-    // Request permission first
-    const perm = await Geolocation.requestPermissions();
-    if (perm.location !== 'granted' && perm.coarseLocation !== 'granted') {
-      return null;
+function getBrowserPosition(): Promise<{ lat: number; lon: number } | null> {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve(null);
+      return;
     }
-    const pos = await Geolocation.getCurrentPosition({ timeout: 10000 });
-    return { lat: pos.coords.latitude, lon: pos.coords.longitude };
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+      () => resolve(null),
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }
+    );
+  });
+}
+
+async function getPosition(): Promise<{ lat: number; lon: number } | null> {
+  // Try Capacitor Geolocation first (native app)
+  try {
+    const { Geolocation } = await import('@capacitor/geolocation');
+    const perm = await Geolocation.requestPermissions();
+    if (perm.location === 'granted' || perm.coarseLocation === 'granted') {
+      const pos = await Geolocation.getCurrentPosition({ timeout: 15000 });
+      return { lat: pos.coords.latitude, lon: pos.coords.longitude };
+    }
   } catch {
-    // Fallback to browser API (for web/PWA)
-    return new Promise((resolve) => {
-      if (!navigator.geolocation) {
-        resolve(null);
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        (pos) => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
-        () => resolve(null),
-        { timeout: 10000 }
-      );
-    });
+    // Capacitor not available, use browser API
   }
+  return getBrowserPosition();
 }
 
 export function useWeather(enabled: boolean): WeatherData {
@@ -110,7 +113,11 @@ export function useWeather(enabled: boolean): WeatherData {
       const coords = await getPosition();
       if (cancelled) return;
       if (!coords) {
-        setData(EMPTY);
+        // Keep cached data if available
+        const c = loadCache();
+        if (c) {
+          setData(c);
+        }
         return;
       }
       try {

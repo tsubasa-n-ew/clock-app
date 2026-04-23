@@ -13,9 +13,14 @@ const SETTINGS_KEY = 'clock_settings';
 const LOCATION_KEY = 'clock_location_enabled';
 const GEAR_VISIBLE_MS = 3000;
 
-// 1024px = 100vw 基準の変換ヘルパー
+// 横方向: 1024px基準 → vw
 export function vw(px: number): string {
   return `${(px / 1024) * 100}vw`;
+}
+
+// 縦方向: 600px基準 → vh
+export function vh(px: number): string {
+  return `${(px / 600) * 100}vh`;
 }
 
 function loadSettings(): Settings {
@@ -99,18 +104,20 @@ export default function App() {
 
   const fontWeightValue = toFontWeightNumber(settings.fontWeight);
   const isDark = settings.colorMode === 'dark';
+  const bg = isDark ? '#1a1a1a' : 'rgba(255, 255, 255, 0.93)';
+  const fg = isDark ? '#e0e0e0' : '#222';
 
   return (
     <div
       style={{
         position: 'relative',
         width: '100vw',
-        height: `${(600 / 1024) * 100}vw`,
+        height: '100vh',
         overflow: 'hidden',
         userSelect: 'none',
         cursor: 'default',
-        background: isDark ? '#1a1a1a' : 'rgba(255, 255, 255, 0.93)',
-        color: isDark ? '#e0e0e0' : '#222',
+        background: bg,
+        color: fg,
       }}
       onClick={handleScreenTap}
     >
@@ -119,7 +126,7 @@ export default function App() {
           style={{
             position: 'absolute',
             right: vw(72),
-            top: vw(75),
+            top: vh(75),
             transform: 'translateY(-50%)',
           }}
         >
@@ -129,8 +136,8 @@ export default function App() {
       <div
         style={{
           position: 'absolute',
-          top: vw(157),
-          left: 'calc(50% - 0.879vw)',
+          top: vh(157),
+          left: '50%',
           transform: 'translateX(-50%)',
         }}
       >
@@ -146,8 +153,8 @@ export default function App() {
       <div
         style={{
           position: 'absolute',
-          top: vw(454),
-          left: 'calc(50% + 0.195vw)',
+          top: vh(454),
+          left: '50%',
           transform: 'translateX(-50%)',
           display: 'flex',
           alignItems: 'center',
