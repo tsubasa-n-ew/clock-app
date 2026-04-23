@@ -10,7 +10,7 @@ import { SettingsPanel } from './components/SettingsPanel';
 import type { Settings, FontWeight, ColorMode } from './types';
 
 const SETTINGS_KEY = 'clock_settings';
-const LOCATION_KEY = 'clock_location_enabled';
+const CITY_KEY = 'clock_city';
 const GEAR_VISIBLE_MS = 3000;
 
 // 横方向: 1024px基準 → vw
@@ -36,9 +36,7 @@ function loadSettings(): Settings {
 function saveSettings(s: Settings): void {
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
-  } catch {
-    // ignore
-  }
+  } catch {}
 }
 
 function toFontWeightNumber(fw: FontWeight): number {
@@ -54,16 +52,16 @@ function toFontWeightNumber(fw: FontWeight): number {
 
 export default function App() {
   const time = useClock();
-  const [locationEnabled, setLocationEnabled] = useState(() => localStorage.getItem(LOCATION_KEY) === 'true');
-  const { data: weather, refresh: refreshWeather } = useWeather(locationEnabled);
+  const [city, setCity] = useState(() => localStorage.getItem(CITY_KEY) ?? '');
+  const { data: weather, refresh: refreshWeather } = useWeather(city);
   const [settings, setSettings] = useState<Settings>(loadSettings);
   const [gearVisible, setGearVisible] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const gearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  function handleLocationToggle(enabled: boolean) {
-    localStorage.setItem(LOCATION_KEY, String(enabled));
-    setLocationEnabled(enabled);
+  function handleCityChange(newCity: string) {
+    localStorage.setItem(CITY_KEY, newCity);
+    setCity(newCity);
   }
 
   const handleScreenTap = useCallback(() => {
@@ -168,11 +166,11 @@ export default function App() {
       {panelOpen && (
         <SettingsPanel
           settings={settings}
-          locationEnabled={locationEnabled}
+          city={city}
           onClose={() => setPanelOpen(false)}
           onFontWeightChange={handleFontWeightChange}
           onColorModeChange={handleColorModeChange}
-          onLocationToggle={handleLocationToggle}
+          onCityChange={handleCityChange}
           onRefreshWeather={refreshWeather}
         />
       )}

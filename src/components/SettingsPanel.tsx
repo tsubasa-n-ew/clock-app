@@ -1,12 +1,13 @@
+import { useState } from 'react';
 import type { Settings, FontWeight, ColorMode } from '../types';
 
 interface Props {
   settings: Settings;
-  locationEnabled: boolean;
+  city: string;
   onClose: () => void;
   onFontWeightChange: (fw: FontWeight) => void;
   onColorModeChange: (cm: ColorMode) => void;
-  onLocationToggle: (enabled: boolean) => void;
+  onCityChange: (city: string) => void;
   onRefreshWeather: () => void;
 }
 
@@ -18,7 +19,14 @@ const FONT_WEIGHTS: { value: FontWeight; label: string }[] = [
   { value: 'bold', label: 'Bold' },
 ];
 
-export function SettingsPanel({ settings, locationEnabled, onClose, onFontWeightChange, onColorModeChange, onLocationToggle, onRefreshWeather }: Props) {
+export function SettingsPanel({ settings, city, onClose, onFontWeightChange, onColorModeChange, onCityChange, onRefreshWeather }: Props) {
+  const [cityInput, setCityInput] = useState(city);
+
+  function handleCitySubmit() {
+    onCityChange(cityInput);
+    onRefreshWeather();
+  }
+
   return (
     <div
       className="settings-overlay"
@@ -26,7 +34,7 @@ export function SettingsPanel({ settings, locationEnabled, onClose, onFontWeight
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="settings-panel">
+      <div className="settings-panel" onClick={(e) => e.stopPropagation()}>
         <button className="settings-close" onClick={onClose} aria-label="閉じる">✕</button>
         <h2 className="settings-title">設定</h2>
 
@@ -64,28 +72,38 @@ export function SettingsPanel({ settings, locationEnabled, onClose, onFontWeight
         </section>
 
         <section className="settings-section">
-          <p className="settings-label">位置情報（天気・気温・湿度）</p>
-          <div className="settings-row">
+          <p className="settings-label">天気・気温・湿度（都市名を入力）</p>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <input
+              type="text"
+              value={cityInput}
+              onChange={(e) => setCityInput(e.target.value)}
+              placeholder="例: 福岡"
+              style={{
+                flex: 1,
+                padding: '8px',
+                border: '1px solid #ccc',
+                fontFamily: 'Noto Sans JP, sans-serif',
+                fontSize: '14px',
+                color: '#222',
+                outline: 'none',
+              }}
+            />
             <button
-              className={`settings-btn${!locationEnabled ? ' settings-btn--active' : ''}`}
-              onClick={() => onLocationToggle(false)}
+              className="settings-btn settings-btn--active"
+              style={{ flex: 'none', width: '60px' }}
+              onClick={handleCitySubmit}
             >
-              オフ
-            </button>
-            <button
-              className={`settings-btn${locationEnabled ? ' settings-btn--active' : ''}`}
-              onClick={() => onLocationToggle(true)}
-            >
-              オン
+              設定
             </button>
           </div>
-          {locationEnabled && (
+          {city && (
             <button
               className="settings-btn"
               style={{ marginTop: '8px', width: '100%' }}
-              onClick={onRefreshWeather}
+              onClick={() => { onCityChange(''); setCityInput(''); }}
             >
-              天気・気温・湿度を更新
+              天気表示をオフ
             </button>
           )}
         </section>
