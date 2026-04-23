@@ -51,15 +51,15 @@ export function TimeDisplay({ time, fontWeight = 400 }: Props) {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: vw(30), whiteSpace: 'nowrap' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: vw(19.203), width: vw(340) }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: vw(19.203) }}>
         <span style={numStyleHM}>{pad(time.hours)}</span>
         <span style={kanjiStyleHM}>時</span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: vw(19.203), width: vw(340) }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: vw(19.203) }}>
         <span style={numStyleHM}>{pad(time.minutes)}</span>
         <span style={kanjiStyleHM}>分</span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: vw(9.167), width: vw(160), paddingTop: vw(73.211) }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: vw(9.167), paddingTop: vw(73.211) }}>
         <span style={numStyleSec}>{pad(time.seconds)}</span>
         <span style={kanjiStyleSec}>秒</span>
       </div>
