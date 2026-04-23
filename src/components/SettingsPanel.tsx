@@ -2,9 +2,11 @@ import type { Settings, FontWeight, ColorMode } from '../types';
 
 interface Props {
   settings: Settings;
+  locationEnabled: boolean;
   onClose: () => void;
   onFontWeightChange: (fw: FontWeight) => void;
   onColorModeChange: (cm: ColorMode) => void;
+  onLocationToggle: (enabled: boolean) => void;
 }
 
 const FONT_WEIGHTS: { value: FontWeight; label: string }[] = [
@@ -15,7 +17,7 @@ const FONT_WEIGHTS: { value: FontWeight; label: string }[] = [
   { value: 'bold', label: 'Bold' },
 ];
 
-export function SettingsPanel({ settings, onClose, onFontWeightChange, onColorModeChange }: Props) {
+export function SettingsPanel({ settings, locationEnabled, onClose, onFontWeightChange, onColorModeChange, onLocationToggle }: Props) {
   return (
     <div
       className="settings-overlay"
@@ -56,6 +58,24 @@ export function SettingsPanel({ settings, onClose, onFontWeightChange, onColorMo
               onClick={() => onColorModeChange('dark')}
             >
               ダーク
+            </button>
+          </div>
+        </section>
+
+        <section className="settings-section">
+          <p className="settings-label">位置情報（天気・気温・湿度）</p>
+          <div className="settings-row">
+            <button
+              className={`settings-btn${!locationEnabled ? ' settings-btn--active' : ''}`}
+              onClick={() => onLocationToggle(false)}
+            >
+              オフ
+            </button>
+            <button
+              className={`settings-btn${locationEnabled ? ' settings-btn--active' : ''}`}
+              onClick={() => onLocationToggle(true)}
+            >
+              オン
             </button>
           </div>
         </section>
