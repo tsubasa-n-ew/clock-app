@@ -67,7 +67,7 @@ const EMPTY: WeatherData = {
   available: false,
 };
 
-function getBrowserPosition(): Promise<{ lat: number; lon: number } | null> {
+function getPosition(): Promise<{ lat: number; lon: number } | null> {
   return new Promise((resolve) => {
     if (!navigator.geolocation) {
       resolve(null);
@@ -76,24 +76,9 @@ function getBrowserPosition(): Promise<{ lat: number; lon: number } | null> {
     navigator.geolocation.getCurrentPosition(
       (pos) => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
       () => resolve(null),
-      { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }
+      { enableHighAccuracy: false, timeout: 30000, maximumAge: 600000 }
     );
   });
-}
-
-async function getPosition(): Promise<{ lat: number; lon: number } | null> {
-  // Try Capacitor Geolocation first (native app)
-  try {
-    const { Geolocation } = await import('@capacitor/geolocation');
-    const perm = await Geolocation.requestPermissions();
-    if (perm.location === 'granted' || perm.coarseLocation === 'granted') {
-      const pos = await Geolocation.getCurrentPosition({ timeout: 15000 });
-      return { lat: pos.coords.latitude, lon: pos.coords.longitude };
-    }
-  } catch {
-    // Capacitor not available, use browser API
-  }
-  return getBrowserPosition();
 }
 
 export function useWeather(enabled: boolean): WeatherData {
@@ -113,11 +98,8 @@ export function useWeather(enabled: boolean): WeatherData {
       const coords = await getPosition();
       if (cancelled) return;
       if (!coords) {
-        // Keep cached data if available
         const c = loadCache();
-        if (c) {
-          setData(c);
-        }
+        if (c) setData(c);
         return;
       }
       try {
@@ -127,7 +109,8 @@ export function useWeather(enabled: boolean): WeatherData {
           saveCache(result);
         }
       } catch {
-        // keep existing data
+        const c = loadCache();
+        if (c && !cancelled) setData(c);
       }
     }
 
