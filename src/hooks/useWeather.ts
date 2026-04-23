@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Geolocation } from '@capacitor/geolocation';
 import type { WeatherData } from '../types';
 
 const WEATHER_REFRESH_MS = 10 * 60 * 1000;
@@ -67,6 +68,31 @@ const EMPTY: WeatherData = {
   available: false,
 };
 
+async function getPosition(): Promise<{ lat: number; lon: number } | null> {
+  try {
+    // Request permission first
+    const perm = await Geolocation.requestPermissions();
+    if (perm.location !== 'granted' && perm.coarseLocation !== 'granted') {
+      return null;
+    }
+    const pos = await Geolocation.getCurrentPosition({ timeout: 10000 });
+    return { lat: pos.coords.latitude, lon: pos.coords.longitude };
+  } catch {
+    // Fallback to browser API (for web/PWA)
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) {
+        resolve(null);
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+        () => resolve(null),
+        { timeout: 10000 }
+      );
+    });
+  }
+}
+
 export function useWeather(enabled: boolean): WeatherData {
   const cached = loadCache();
   const [data, setData] = useState<WeatherData>(cached ?? EMPTY);
@@ -80,26 +106,22 @@ export function useWeather(enabled: boolean): WeatherData {
 
     let cancelled = false;
 
-    function load() {
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          if (cancelled) return;
-          try {
-            const result = await fetchWeather(pos.coords.latitude, pos.coords.longitude);
-            if (!cancelled) {
-              setData(result);
-              saveCache(result);
-            }
-          } catch {
-            // keep existing data
-          }
-        },
-        () => {
-          if (!cancelled) {
-            setData(EMPTY);
-          }
+    async function load() {
+      const coords = await getPosition();
+      if (cancelled) return;
+      if (!coords) {
+        setData(EMPTY);
+        return;
+      }
+      try {
+        const result = await fetchWeather(coords.lat, coords.lon);
+        if (!cancelled) {
+          setData(result);
+          saveCache(result);
         }
-      );
+      } catch {
+        // keep existing data
+      }
     }
 
     load();
