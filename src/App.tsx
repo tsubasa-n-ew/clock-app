@@ -55,7 +55,7 @@ function toFontWeightNumber(fw: FontWeight): number {
 export default function App() {
   const time = useClock();
   const [locationEnabled, setLocationEnabled] = useState(() => localStorage.getItem(LOCATION_KEY) === 'true');
-  const weather = useWeather(locationEnabled);
+  const { data: weather, refresh: refreshWeather } = useWeather(locationEnabled);
   const [settings, setSettings] = useState<Settings>(loadSettings);
   const [gearVisible, setGearVisible] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -173,6 +173,7 @@ export default function App() {
           onFontWeightChange={handleFontWeightChange}
           onColorModeChange={handleColorModeChange}
           onLocationToggle={handleLocationToggle}
+          onRefreshWeather={refreshWeather}
         />
       )}
     </div>

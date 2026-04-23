@@ -7,6 +7,7 @@ interface Props {
   onFontWeightChange: (fw: FontWeight) => void;
   onColorModeChange: (cm: ColorMode) => void;
   onLocationToggle: (enabled: boolean) => void;
+  onRefreshWeather: () => void;
 }
 
 const FONT_WEIGHTS: { value: FontWeight; label: string }[] = [
@@ -17,7 +18,7 @@ const FONT_WEIGHTS: { value: FontWeight; label: string }[] = [
   { value: 'bold', label: 'Bold' },
 ];
 
-export function SettingsPanel({ settings, locationEnabled, onClose, onFontWeightChange, onColorModeChange, onLocationToggle }: Props) {
+export function SettingsPanel({ settings, locationEnabled, onClose, onFontWeightChange, onColorModeChange, onLocationToggle, onRefreshWeather }: Props) {
   return (
     <div
       className="settings-overlay"
@@ -78,6 +79,15 @@ export function SettingsPanel({ settings, locationEnabled, onClose, onFontWeight
               オン
             </button>
           </div>
+          {locationEnabled && (
+            <button
+              className="settings-btn"
+              style={{ marginTop: '8px', width: '100%' }}
+              onClick={onRefreshWeather}
+            >
+              天気を更新
+            </button>
+          )}
         </section>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { WeatherData } from '../types';
 
 const WEATHER_REFRESH_MS = 10 * 60 * 1000;
@@ -67,7 +67,8 @@ const EMPTY: WeatherData = {
   available: false,
 };
 
-function getPosition(): Promise<{ lat: number; lon: number } | null> {
+// navigator.geolocation で位置取得
+function getBrowserPosition(): Promise<{ lat: number; lon: number } | null> {
   return new Promise((resolve) => {
     if (!navigator.geolocation) {
       resolve(null);
@@ -76,54 +77,74 @@ function getPosition(): Promise<{ lat: number; lon: number } | null> {
     navigator.geolocation.getCurrentPosition(
       (pos) => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
       () => resolve(null),
-      { enableHighAccuracy: false, timeout: 30000, maximumAge: 600000 }
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 }
     );
   });
 }
 
-export function useWeather(enabled: boolean): WeatherData {
+// IPアドレスから位置取得（フォールバック）
+async function getIpPosition(): Promise<{ lat: number; lon: number } | null> {
+  try {
+    const res = await fetch('https://ipapi.co/json/');
+    const json = await res.json();
+    if (json.latitude && json.longitude) {
+      return { lat: json.latitude, lon: json.longitude };
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+async function getPosition(): Promise<{ lat: number; lon: number } | null> {
+  // まずブラウザAPIを試す
+  const browserPos = await getBrowserPosition();
+  if (browserPos) return browserPos;
+  // フォールバック: IPベースの位置取得
+  return getIpPosition();
+}
+
+export function useWeather(enabled: boolean): { data: WeatherData; refresh: () => void } {
   const cached = loadCache();
   const [data, setData] = useState<WeatherData>(cached ?? EMPTY);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const load = useCallback(async () => {
+    const coords = await getPosition();
+    if (!coords) {
+      const c = loadCache();
+      if (c) setData(c);
+      return;
+    }
+    try {
+      const result = await fetchWeather(coords.lat, coords.lon);
+      setData(result);
+      saveCache(result);
+    } catch {
+      const c = loadCache();
+      if (c) setData(c);
+    }
+  }, []);
+
   useEffect(() => {
     if (!enabled) {
       setData(EMPTY);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
       return;
-    }
-
-    let cancelled = false;
-
-    async function load() {
-      const coords = await getPosition();
-      if (cancelled) return;
-      if (!coords) {
-        const c = loadCache();
-        if (c) setData(c);
-        return;
-      }
-      try {
-        const result = await fetchWeather(coords.lat, coords.lon);
-        if (!cancelled) {
-          setData(result);
-          saveCache(result);
-        }
-      } catch {
-        const c = loadCache();
-        if (c && !cancelled) setData(c);
-      }
     }
 
     load();
     timerRef.current = setInterval(load, WEATHER_REFRESH_MS);
 
     return () => {
-      cancelled = true;
       if (timerRef.current !== null) {
         clearInterval(timerRef.current);
       }
     };
-  }, [enabled]);
+  }, [enabled, load]);
 
-  return data;
+  return { data, refresh: load };
 }
