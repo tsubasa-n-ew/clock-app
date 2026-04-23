@@ -85,7 +85,7 @@ export function SettingsPanel({ settings, locationEnabled, onClose, onFontWeight
               style={{ marginTop: '8px', width: '100%' }}
               onClick={onRefreshWeather}
             >
-              天気を更新
+              天気・気温・湿度を更新
             </button>
           )}
         </section>
